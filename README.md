@@ -177,7 +177,7 @@ sudo fuser -k 8080/tcp
 # Restart Docker
 sudo systemctl restart docker
 
-# Delete resources
+# Step 9: Clean Up
 kubectl delete pod <pod-name>
 minikube stop
 minikube delete
@@ -187,10 +187,8 @@ minikube delete
 - Ensure all ports (8080, 3000, 9090) are available before port forwarding
 - Some commands might require sudo privileges
 - Docker Hub push requires authentication with your Docker Hub credentials
-- Make sure to wait for each component to be ready before proceeding to the next step
+- Make sure to wait for each component to be ready before proceeding to the next step. 
 
 
-## Step 9: Clean Up
-minikube stop
-minikube delete
+   
 
