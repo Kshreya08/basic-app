@@ -1,0 +1,30 @@
+replicaCount: 1
+
+image:
+  repository: kshreya08/basic-app  # Update with your Docker image name (e.g., "kshreya08/basic-app")
+  pullPolicy: IfNotPresent
+  tag: latest  # Ensure this matches the tag for your app's latest version
+
+service:
+  type: NodePort  # Expose the service via NodePort
+  port: 80        # Set the service port to 80
+
+autoscaling:
+  enabled: false  # Disabled autoscaling by default
+  minReplicas: 1  # Minimum number of replicas
+  maxReplicas: 3  # Maximum number of replicas
+  targetCPUUtilizationPercentage: 80  # Target CPU utilization for scaling
+
+serviceAccount:
+  create: true  # Set to true to create a service account
+  name: ""      # Leave empty to use the default name (Release Name)
+
+ingress:
+  enabled: false  # Set to true if you want to enable ingress
+  name: ""        # Optional, can leave empty
+  annotations: {}  # Optional, add ingress annotations here
+  hosts:
+    - host: example.com
+      paths:
+        - /
+
