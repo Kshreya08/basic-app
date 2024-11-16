@@ -12,150 +12,204 @@ A simple Node.js application containerized with Docker and deployed to Kubernete
 
 ## 🚀 Quick Start
 
-### Prerequisites
+# Complete Installation Guide for Basic App Project
 
-```markdown
-✓ Node.js and npm
-✓ Docker
-✓ Kubernetes (Minikube)
-✓ Helm
-✓ kubectl
+## Prerequisites Installation
+
+### 1. Docker and Minikube Setup
+```bash
+# Install Docker (if not already installed)
+sudo apt update
+sudo apt install docker.io
+
+# Add current user to docker group
+sudo usermod -aG docker $USER
+newgrp docker
+
+# Start Minikube with Docker driver
+minikube start --driver=docker
 ```
 
-### Local Development
-
+### 2. Node.js and npm Installation
 ```bash
-# Install dependencies
-npm install
+# Install Node.js and npm
+sudo apt update
+sudo apt install nodejs npm
 
-# Start local server
-node server.js
+# Verify installations
+node -v
+npm -v
 ```
 
----
+## Project Setup
 
-## 🐳 Docker Setup
-
+### 1. Initialize Node.js Project
 ```bash
-# Build image
+# Create project directory and navigate into it
+mkdir basic-app && cd basic-app
+
+# Initialize Node.js project
+npm init -y
+
+# Install Express.js
+npm install express
+
+# Create server file
+touch server.js
+```
+
+### 2. Docker Configuration
+```bash
+# Create Dockerfile
+touch Dockerfile
+
+# Build Docker image
 docker build -t basic-app .
 
-# Run container
+# Run Docker container
 docker run -p 8080:8080 basic-app
+
+# Tag Docker image for Docker Hub
+docker tag basic-app kshreya08/basic-app:latest
+
+# Push to Docker Hub (requires Docker Hub account)
+docker login
+docker push kshreya08/basic-app:latest
 ```
 
----
-
-## ☸️ Kubernetes Setup
-
-### Initialize Minikube
-
+### 3. Helm Chart Setup
 ```bash
-# Start Minikube
-minikube start --driver=docker
+# Add Helm stable repository
+helm repo add stable https://charts.helm.sh/stable
+helm repo update
 
-# Verify cluster
-kubectl cluster-info
-```
+# Create Helm chart
+helm create basic-chart
 
-### Deploy with Helm
+# Remove unnecessary template files
+cd basic-chart
+rm templates/ingress.yaml templates/serviceaccount.yaml templates/hpa.yaml templates/tests
 
-```bash
-# Install application
+# Install the application using Helm
 helm install basic-app ./basic-chart
 
-# Get service URL
-export NODE_PORT=$(kubectl get --namespace default -o jsonpath="{.spec.ports[0].nodePort}" services basic-app)
-export NODE_IP=$(kubectl get nodes --namespace default -o jsonpath="{.items[0].status.addresses[0].address}")
-echo http://$NODE_IP:$NODE_PORT
+# Upgrade installation if needed
+helm upgrade --install basic-app ./basic-chart
 ```
 
----
+### 4. Monitoring Stack Installation
 
-## 📊 Monitoring Stack
-
-### Prometheus Setup
-
+#### Prometheus Setup
 ```bash
-# Add repository
+# Add Prometheus repository
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 helm repo update
 
 # Install Prometheus
 helm install prometheus prometheus-community/kube-prometheus-stack
 
-# Access Prometheus
+# Forward Prometheus port
 kubectl port-forward svc/prometheus-kube-prometheus-prometheus 9090:9090
 ```
 
-### Grafana Setup
-
+#### Grafana Setup
 ```bash
-# Add repository
+# Add Grafana repository
 helm repo add grafana https://grafana.github.io/helm-charts
 helm repo update
 
 # Install Grafana
 helm install grafana grafana/grafana
 
-# Access Grafana
+# Forward Grafana port
 kubectl port-forward service/grafana 3000:80
 
-# Get admin password
+# Get Grafana admin password
 kubectl get secret --namespace default grafana -o jsonpath="{.data.admin-password}" | base64 --decode
+
+# Create new Grafana password (optional)
+kubectl create secret generic grafana --from-literal=admin-password=helloworld -n default
+kubectl rollout restart deployment/grafana -n default
 ```
 
----
+## Verification Commands
 
-## 📁 Project Structure
+### Check Kubernetes Resources
+```bash
+# Check pods
+kubectl get pods
 
+# Check services
+kubectl get svc
+
+# Get cluster info
+kubectl cluster-info
+
+# Get Minikube IP
+minikube ip
 ```
-basic-app/
-├── 📜 server.js         # Main application file
-├── 🐳 Dockerfile        # Docker configuration
-├── 📦 package.json      # Node.js dependencies
-└── ⎈  basic-chart/     # Helm chart
-    ├── Chart.yaml
-    ├── values.yaml
-    └── templates/
-        ├── deployment.yaml
-        ├── service.yaml
-        └── _helpers.tpl
+
+### Port Forwarding
+```bash
+# Forward application port
+kubectl port-forward service/basic-app 8080:80
+
+# Forward Grafana port
+kubectl port-forward service/grafana 3000:80
+
+# Forward Prometheus port
+kubectl port-forward svc/prometheus-kube-prometheus-prometheus 9090:9090
 ```
 
----
-
-## 🛠️ Common Commands
+## Troubleshooting Commands
 
 ```bash
-# Development
-npm start                 # Start local server
+# Check pod logs
+kubectl logs <pod-name>
 
-# Docker
-docker build -t basic-app .           # Build image
-docker run -p 8080:8080 basic-app     # Run container
+# Describe pod
+kubectl describe pod <pod-name>
 
-# Kubernetes
-helm install basic-app ./basic-chart   # Deploy app
-kubectl port-forward service/basic-app 8080:80  # Forward port
+# Check port usage
+sudo lsof -i :8080
+sudo fuser -k 8080/tcp
+
+# Restart Docker
+sudo systemctl restart docker
+
+# Delete resources
+kubectl delete pod <pod-name>
+minikube stop
+minikube delete
 ```
 
----
+## Git Setup (Optional)
+```bash
+# Initialize git repository
+git init
 
+# Configure git
+git config --global user.name "YourUsername"
+git config --global user.email "your.email@example.com"
 
----
+# Add and commit files
+git add .
+git commit -m "Initial commit for basic-app project"
 
-## 📝 License
+# Set up remote repository
+git remote add origin https://github.com/YourUsername/basic-app.git
+git branch -M main
+git push -u origin main
+```
 
-This project is licensed under the MIT License.
+## Notes:
+- Replace `YourUsername` with your actual GitHub username
+- Ensure all ports (8080, 3000, 9090) are available before port forwarding
+- Some commands might require sudo privileges
+- Docker Hub push requires authentication with your Docker Hub credentials
+- Make sure to wait for each component to be ready before proceeding to the next step
 
----
-
-## 🔍 Status
-
-![GitHub last commit](https://img.shields.io/github/last-commit/Kshreya08/basic-app)
-![GitHub issues](https://img.shields.io/github/issues/Kshreya08/basic-app)
-![GitHub pull requests](https://img.shields.io/github/issues-pr/Kshreya08/basic-app)
+This guide follows the exact sequence of commands used in your project setup, organized in a logical order for new users to follow.
 
 Step 9: Clean Up
 minikube stop
