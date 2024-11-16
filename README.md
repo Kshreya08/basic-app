@@ -1,98 +1,161 @@
 # Basic App Deployment with Helm and Minikube
 
-## Overview
-This project involves the creation of a basic Node.js application, containerizing it with Docker, and deploying it to a local Kubernetes cluster using Minikube. It also includes monitoring the application with Prometheus and Grafana.
+[![Node.js](https://img.shields.io/badge/Node.js-v14+-green.svg)](https://nodejs.org/)
+[![Docker](https://img.shields.io/badge/Docker-blue.svg)](https://www.docker.com/)
+[![Kubernetes](https://img.shields.io/badge/Kubernetes-v1.24+-blue.svg)](https://kubernetes.io/)
 
-## Prerequisites
-- Minikube
-- Helm
-- Docker
-- Node.js and npm
+## 📋 Overview
 
-## Steps to Set Up and Deploy
+A simple Node.js application containerized with Docker and deployed to Kubernetes using Helm, with monitoring setup using Prometheus and Grafana.
 
-### Step 1: Set Up Minikube
-To set up Minikube and install necessary tools, use the following commands:
+---
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+```markdown
+✓ Node.js and npm
+✓ Docker
+✓ Kubernetes (Minikube)
+✓ Helm
+✓ kubectl
+```
+
+### Local Development
+
 ```bash
-# Start Minikube with the Docker driver
-sudo minikube start --driver=docker
+# Install dependencies
+npm install
 
-Step 2: Install Helm
-# Add the stable Helm chart repo
-helm repo add stable https://charts.helm.sh/stable
-helm repo update
-
-Step 3: Set Up the Node.js Application
-mkdir basic-app && cd basic-app
-npm init -y
-sudo apt update
-sudo apt install nodejs npm
-node -v
-npm -v
-
-npm install express
-
-touch server.js
-vim server.js
-
+# Start local server
 node server.js
+```
 
-Step 4: Dockerize the Application
-Create a Dockerfile
-touch Dockerfile
-vim Dockerfile
+---
 
+## 🐳 Docker Setup
 
-Build and Run the Docker Container
-
+```bash
+# Build image
 docker build -t basic-app .
+
+# Run container
 docker run -p 8080:8080 basic-app
+```
 
-docker tag basic-app kshreya08/basic-app:latest
-docker login
-docker push kshreya08/basic-app:latest
+---
 
-Step 5: Helm Chart for Kubernetes Deployment
-Create a Helm Chart for Your App
+## ☸️ Kubernetes Setup
 
-helm create basic-chart
-cd basic-chart
+### Initialize Minikube
 
-onfigure Deployment and Service Update the values.yaml, deployment.yaml, and service.yaml to define your app's deployment and service specifications.
+```bash
+# Start Minikube
+minikube start --driver=docker
 
+# Verify cluster
+kubectl cluster-info
+```
+
+### Deploy with Helm
+
+```bash
+# Install application
 helm install basic-app ./basic-chart
 
-helm upgrade --install basic-app ./basic-chart
-
-kubectl get svc
-# Get the NodePort
+# Get service URL
 export NODE_PORT=$(kubectl get --namespace default -o jsonpath="{.spec.ports[0].nodePort}" services basic-app)
 export NODE_IP=$(kubectl get nodes --namespace default -o jsonpath="{.items[0].status.addresses[0].address}")
 echo http://$NODE_IP:$NODE_PORT
+```
 
-Step 7: Set Up Monitoring with Prometheus and Grafana
-Install Prometheus and Grafana Using Helm
+---
+
+## 📊 Monitoring Stack
+
+### Prometheus Setup
+
+```bash
+# Add repository
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm repo update
+
+# Install Prometheus
 helm install prometheus prometheus-community/kube-prometheus-stack
+
+# Access Prometheus
+kubectl port-forward svc/prometheus-kube-prometheus-prometheus 9090:9090
+```
+
+### Grafana Setup
+
+```bash
+# Add repository
+helm repo add grafana https://grafana.github.io/helm-charts
+helm repo update
+
+# Install Grafana
 helm install grafana grafana/grafana
 
-Port Forward to Access Grafana
+# Access Grafana
 kubectl port-forward service/grafana 3000:80
 
-Access the Grafana UI
+# Get admin password
 kubectl get secret --namespace default grafana -o jsonpath="{.data.admin-password}" | base64 --decode
+```
 
-Configure Dashboards Set up the necessary dashboards to monitor your application.
+---
 
-Step 8: Troubleshooting
-View Logs for Prometheus
-kubectl logs prometheus-prometheus-kube-prometheus-prometheus-0 -n default
+## 📁 Project Structure
 
-Reinstall Grafana 
-kubectl rollout restart deployment/grafana -n default
+```
+basic-app/
+├── 📜 server.js         # Main application file
+├── 🐳 Dockerfile        # Docker configuration
+├── 📦 package.json      # Node.js dependencies
+└── ⎈  basic-chart/     # Helm chart
+    ├── Chart.yaml
+    ├── values.yaml
+    └── templates/
+        ├── deployment.yaml
+        ├── service.yaml
+        └── _helpers.tpl
+```
 
-Delete and Reinstall Pods 
-kubectl delete pod <pod-name>
-kubectl get pods
+---
+
+## 🛠️ Common Commands
+
+```bash
+# Development
+npm start                 # Start local server
+
+# Docker
+docker build -t basic-app .           # Build image
+docker run -p 8080:8080 basic-app     # Run container
+
+# Kubernetes
+helm install basic-app ./basic-chart   # Deploy app
+kubectl port-forward service/basic-app 8080:80  # Forward port
+```
+
+---
+
+
+---
+
+## 📝 License
+
+This project is licensed under the MIT License.
+
+---
+
+## 🔍 Status
+
+![GitHub last commit](https://img.shields.io/github/last-commit/Kshreya08/basic-app)
+![GitHub issues](https://img.shields.io/github/issues/Kshreya08/basic-app)
+![GitHub pull requests](https://img.shields.io/github/issues-pr/Kshreya08/basic-app)
 
 Step 9: Clean Up
 minikube stop
