@@ -67,7 +67,7 @@ touch Dockerfile
 docker build -t basic-app .
 
 # Run Docker container
-docker run -p 8080:8080 basic-app
+docker run -p 8081:8080 basic-app (Change the port mapping)
 
 # Tag Docker image for Docker Hub
 docker tag basic-app kshreya08/basic-app:latest
