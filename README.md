@@ -148,6 +148,8 @@ kubectl cluster-info
 # Get Minikube IP
 minikube ip
 ```
+![Screenshot 2024-11-16 071308](https://github.com/user-attachments/assets/e5b8c8e7-f7d6-457a-b224-872a08d7f61d)
+![Screenshot 2024-11-16 071246](https://github.com/user-attachments/assets/63a3f8d2-20f7-4508-9f3f-7c65ac6b28d7)
 
 ### Port Forwarding
 ```bash
